@@ -21,7 +21,7 @@ def find_allip(rawinput):
     allip = re.findall(isip, rawinput)
     return allip
 
-def doextraction(inputFile):
+def doextraction(inputFile, ispathsplit):
     filePath,fileName=os.path.split(inputFile)
     fname = fileName[:fileName.rfind(".")]
     fileContent = ""
@@ -100,14 +100,26 @@ def doextraction(inputFile):
         rawurllist = find_allurl(fileContent)
         for item in rawurllist:
             item = item[0]
-            tmp = re.search(r'(https?:/)(.*)',item)
-            urltmp = tmp[1]
-            for segment in tmp[2].split("/"):
-                if segment != "":
-                    urltmp += "/"+segment
-                    if urltmp not in urlset:
-                        urlset.add(urltmp)
-                        f.write("%s\n"%urltmp)    
+
+            if item not in urlset:
+                urlset.add(item)
+                f.write("%s\n"%item)
+
+            if ispathsplit:
+                tmp = 999
+                if -1< item.find('?') < tmp:
+                    tmp = item.find('?')
+                if -1< item.find('#') < tmp:
+                    tmp = item.find('#')
+                item = item[:tmp]
+                tmp = re.search(r'(https?:/)(.*)',item)
+                urltmp = tmp[1]
+                for segment in tmp[2].split("/"):
+                    if segment != "":
+                        urltmp += "/"+segment
+                        if urltmp not in urlset:
+                            urlset.add(urltmp)
+                            f.write("%s\n"%urltmp)    
     print("\nextract %5d  URLs    to %s"%(len(urlset),urlf))
 
     print()
@@ -123,7 +135,7 @@ def main():
 
     # parser.add_argument('--url',dest='urloutfile',help="Extract url to the file")
 
-    # parser.add_argument('--all',dest='all',action=bool, help="")
+    parser.add_argument('--pathsplit', dest='pathsplit', action="store_true", default=False, help="is split url path")
 
     args=parser.parse_args()
 
@@ -131,7 +143,7 @@ def main():
     
     if os.path.exists(args.rawinputfile):
 
-        doextraction(args.rawinputfile)
+        doextraction(args.rawinputfile, args.pathsplit)
 
     else:
         print("文件不存在")
