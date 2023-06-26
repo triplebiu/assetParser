@@ -5,7 +5,7 @@ from netaddr import *
 
 def find_allurl(rawinput):
     isurl = re.compile(
-        r'(https?://[\w\.-]+(:\d+)?(/\S*)?)')
+        r'(https?://[\w\.-]+(:\d+)?([\w!@#$%^&*\(\)_+=\[\]\{\}\\\|;:,\./\?-]*)?)')
     allurl = re.findall(isurl, rawinput)
     return allurl
 
@@ -95,6 +95,10 @@ def doextraction(inputFile, ispathsplit):
 
     # 提取url
     urlf = os.path.join(filePath,fname+"_url.txt")
+
+    if ispathsplit:
+        urlf = os.path.join(filePath,fname+"_url_pathsplited.txt")
+
     urlset = set()
     with open(urlf,"w",encoding='utf-8') as f:
         rawurllist = find_allurl(fileContent)
@@ -119,9 +123,8 @@ def doextraction(inputFile, ispathsplit):
                         urltmp += "/"+segment
                         if urltmp not in urlset:
                             urlset.add(urltmp)
-                            f.write("%s\n"%urltmp)    
+                            f.write("%s\n"%urltmp)
     print("\nextract %5d  URLs    to %s"%(len(urlset),urlf))
-
     print()
 
 def main():
@@ -130,24 +133,17 @@ def main():
     parser.add_argument('-f',dest="rawinputfile",required=True,help="Raw Input File")
 
     # parser.add_argument('--ip',dest='ipoutfile',help="Extract ips to the file")
-
     # parser.add_argument('--domain',dest="domainoutfile",help="Extract domain to the file")
-
     # parser.add_argument('--url',dest='urloutfile',help="Extract url to the file")
 
     parser.add_argument('--pathsplit', dest='pathsplit', action="store_true", default=False, help="is split url path")
 
     args=parser.parse_args()
 
-
-    
     if os.path.exists(args.rawinputfile):
-
         doextraction(args.rawinputfile, args.pathsplit)
-
     else:
         print("文件不存在")
-
 
 if __name__ == '__main__':
     main()
